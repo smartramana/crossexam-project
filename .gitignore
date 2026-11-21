@@ -13,6 +13,8 @@ infra/terraform/terraform.tfvars
 .crossexam/
 web/node_modules/
 web/dist/
+certs/*
+!certs/empty-ca.crt
 .claude/
 .DS_Store
 teaching/

@@ -1,0 +1,4 @@
+# Placeholder: no corporate CA. The web build mounts this file when CORP_CA_FILE is unset, finds
+# no PEM certificate block, and lets npm use its own trust store.
+# Behind a TLS-inspection proxy, copy your CA bundle into this folder (it is git-ignored) and set
+# CORP_CA_FILE in .env to it instead of editing this file. See the "web" stage in the Dockerfile.

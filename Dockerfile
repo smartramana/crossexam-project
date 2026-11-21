@@ -9,7 +9,13 @@
 FROM node:24-alpine AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# A corporate TLS-inspection proxy (Netskope, Zscaler, ...) re-signs registry.npmjs.org with a
+# private CA that Node does not trust, so npm ci dies with SELF_SIGNED_CERT_IN_CHAIN. Point
+# CORP_CA_FILE in .env at your CA bundle; off a proxied network the mount is an empty file and
+# npm uses its own trust store as usual.
+RUN --mount=type=secret,id=corp_ca,target=/tmp/corp-ca.crt \
+    if grep -qs -- "-----BEGIN CERTIFICATE-----" /tmp/corp-ca.crt; then export NODE_EXTRA_CA_CERTS=/tmp/corp-ca.crt; fi; \
+    npm ci --no-audit --no-fund
 COPY web ./
 RUN npm run build
 

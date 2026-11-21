@@ -3,8 +3,13 @@
 #   docker compose --profile monitoring up --build     + Prometheus and Grafana
 name: crossexam
 
+x-build: &build
+  context: .
+  secrets:
+    - corp_ca
+
 x-app: &app
-  build: .
+  build: *build
   image: crossexam:local
   env_file: .env
   environment:
@@ -42,7 +47,7 @@ services:
       retries: 20
 
   migrate:
-    build: .
+    build: *build
     image: crossexam:local
     env_file: .env
     environment:
@@ -119,3 +124,11 @@ volumes:
   pgdata:
   storage:
   promdata:
+
+# TLS-inspection proxies (Netskope, Zscaler, ...) re-sign registry.npmjs.org with a private CA,
+# which breaks `npm ci` in the web build stage. Copy your CA bundle into certs/ (git-ignored) and
+# set CORP_CA_FILE in .env to it, e.g. CORP_CA_FILE=./certs/corp-ca.crt. Unset, it falls back to a
+# committed placeholder and the build behaves as before.
+secrets:
+  corp_ca:
+    file: ${CORP_CA_FILE:-./certs/empty-ca.crt}
